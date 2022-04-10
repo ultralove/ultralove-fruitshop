@@ -1,2 +1,1 @@
-# ultralove-aps
-Apple Podcast Directory Scanner
+# Apple Podcast Directory Scanner
