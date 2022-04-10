@@ -43,7 +43,7 @@ public class SqlServerReaderWriter
     return result;
   }
 
-  public static void InsertCollectionIds(List<String> collectionIds)
+  public static void UpdateCollectionIds(List<String> collectionIds)
   {
     using var connection = new SqlConnection(ConnectionString);
     connection.Open();
@@ -54,6 +54,27 @@ public class SqlServerReaderWriter
           collection_id = collectionId
         };
         connection.Query("sp_insert_collection_id", parameters, commandType: CommandType.StoredProcedure);
+      });
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+  }
+
+  public static void InsertOrUpdateCollectionIds(List<String> collectionIds)
+  {
+    using var connection = new SqlConnection(ConnectionString);
+    connection.Open();
+    try {
+      collectionIds.ForEach(collectionId => {
+        var parameters = new
+        {
+          collection_id = collectionId
+        };
+        connection.Query("sp_insert_or_update_collection_id", parameters, commandType: CommandType.StoredProcedure);
       });
     }
     catch (Exception e) {
@@ -113,7 +134,7 @@ public class SqlServerReaderWriter
     }
   }
 
-  public static void FastInsertOrUpdate(List<String> podcasts)
+  public static void FastInsertOrUpdate(List<Podcast> podcasts)
   {
     using var connection = new SqlConnection(ConnectionString);
     connection.Open();
@@ -135,5 +156,79 @@ public class SqlServerReaderWriter
     finally {
       connection.Close();
     }
+  }
+
+  public static List<String> SelectIncomingCollectionIds()
+  {
+    var result = new List<String>();
+    using var connection = new SqlConnection(ConnectionString);
+    connection.Open();
+    try {
+      var parameters = new DynamicParameters();
+      parameters.Add("@result", dbType: DbType.String, direction: ParameterDirection.ReturnValue);
+      result = connection.Query<String>("sp_select_incoming_collection_ids", parameters, commandType: CommandType.StoredProcedure).ToList();
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
+  }
+
+  public static List<String> SelectPendingCollectionIds()
+  {
+    var result = new List<String>();
+    using var connection = new SqlConnection(ConnectionString);
+    connection.Open();
+    try {
+      var parameters = new DynamicParameters();
+      parameters.Add("@result", dbType: DbType.String, direction: ParameterDirection.ReturnValue);
+      result = connection.Query<String>("sp_select_pending_collection_ids", parameters, commandType: CommandType.StoredProcedure).ToList();
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
+  }
+
+  public static List<String> SelectAbandonedCollectionIds()
+  {
+    var result = new List<String>();
+    using var connection = new SqlConnection(ConnectionString);
+    connection.Open();
+    try {
+      var parameters = new DynamicParameters();
+      parameters.Add("@result", dbType: DbType.String, direction: ParameterDirection.ReturnValue);
+      result = connection.Query<String>("sp_select_abandoned_collection_ids", parameters, commandType: CommandType.StoredProcedure).ToList();
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
+  }
+
+  public static List<Podcast> SelectAll()
+  {
+    var result = new List<Podcast>();
+    using var connection = new SqlConnection(ConnectionString);
+    connection.Open();
+    try {
+      result = connection.Query<Podcast>("sp_select_all", commandType: CommandType.StoredProcedure).ToList();
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
   }
 }
