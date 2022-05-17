@@ -1,29 +1,21 @@
 using System.Text.Json.Serialization;
-using FileHelpers;
 
 namespace Ultralove;
 
-[DelimitedRecord(";")]
 public class Podcast
 {
   [JsonPropertyName("collectionId")]
-  [FieldQuoted('"', QuoteMode.AlwaysQuoted, MultilineMode.AllowForBoth)]
   public String CollectionId { get; set; } = String.Empty;
 
   [JsonPropertyName("collectionName")]
-  [FieldQuoted('"', QuoteMode.AlwaysQuoted, MultilineMode.AllowForBoth)]
-  public String CollectionName { get; set; } = String.Empty;
+  public String? CollectionName { get; set; } = null;
 
   [JsonPropertyName("feedUrl")]
-  [FieldQuoted('"', QuoteMode.AlwaysQuoted, MultilineMode.AllowForBoth)]
-  public String FeedUrl { get; set; } = String.Empty;
+  public String? FeedUrl { get; set; } = null;
 
   [JsonIgnore]
-  [FieldQuoted('"', QuoteMode.AlwaysQuoted, MultilineMode.AllowForBoth)]
-  [FieldConverter(ConverterKind.Date, "yyyyMMddTHHmmsszzz")]
-  public DateTime LastSeen { get; set; } = DateTime.MinValue;
+  public Int32 ScanId { get; set; } = Int32.MinValue;
 
   [JsonIgnore]
-  [FieldQuoted('"', QuoteMode.AlwaysQuoted, MultilineMode.AllowForBoth)]
-  public Int32 RetryCount { get; set; } = Int32.MinValue;
+  public Int32 RetryCount { get; set; } = -1;
 }

@@ -2,7 +2,7 @@ using HtmlAgilityPack;
 
 namespace Ultralove;
 
-public class AppleScanner
+public class Scanner
 {
   public static HashSet<String> ReadCollectionIds(String url)
   {

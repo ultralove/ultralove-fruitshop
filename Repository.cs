@@ -1,30 +1,19 @@
-using System.Text.Json;
-
 namespace Ultralove;
+
 public class Repository
 {
-  private static readonly HttpClient s_client = new();
-  public static async Task<Podcast?> LookupPodcast(String podcastId)
-  {
-    Podcast? result = null;
-    if (String.IsNullOrWhiteSpace(podcastId) == false) {
-      s_client.DefaultRequestHeaders.Accept.Clear();
-      s_client.DefaultRequestHeaders.Add("User-Agent", "ultralove apple podcasts scanner v1.0.0");
-      // client.DefaultRequestHeaders.Accept.Add(
-      //         new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+  private static readonly SqlServerReaderWriter s_readerWriter = new();
 
-      try {
-        var url = $"https://itunes.apple.com/lookup?id={podcastId[2..(podcastId.Length)]}";
-        // var stream = await s_client.GetStreamAsync(url);
-        // var podcast = await JsonSerializer.DeserializeAsync<Podcast>(stream);
-        // Console.WriteLine($"{podcast?.Name}");
-        var json = await s_client.GetStringAsync(url);
-        Console.WriteLine($"{json}");
-      }
-      catch (Exception e) {
-        Console.WriteLine($"{e.Message}");
-      }
-    }
-    return result;
-  }
+  public static Int32 StartScan() => s_readerWriter.StartScan();
+  public static void StopScan(Int32 id) => s_readerWriter.StopScan(id);
+
+  public static List<String> SelectActiveCollectionIds() => s_readerWriter.SelectActiveCollectionIds();
+  public static List<String> SelectRetiredCollectionIds() => s_readerWriter.SelectRetiredCollectionIds();
+  public static List<String> SelectIncomingCollectionIds(Int32 count) => s_readerWriter.SelectIncomingCollectionIds(count);
+  public static List<String> SelectPendingCollectionIds(Int32 count) => s_readerWriter.SelectPendingCollectionIds(count);
+  public static Int32 CountCollectionIds() => s_readerWriter.CountCollectionIds();
+  public static void InsertCollectionIds(Int32 id, List<String> collectionIds) => s_readerWriter.InsertCollectionIds(id, collectionIds);
+  public static void RetireCollectionIds(Int32 id, List<String> collectionIds) => s_readerWriter.RetireCollectionIds(id, collectionIds);
+  public static void UpdateCollection(Collection collection) => s_readerWriter.UpdateCollection(collection);
+  public static void UpdateFailedCollection(String collectionId) => s_readerWriter.UpdateFailedCollection(collectionId);
 }

@@ -6,14 +6,38 @@ namespace Ultralove;
 
 public class SqlServerReaderWriter
 {
-  public static String ConnectionString => SqlServerCredentials.ConnectionString;
+  private readonly String _connectionString = SqlServerCredentials.ConnectionString;
 
-  public static void Reset()
+  public Int32 StartScan()
   {
-    using var connection = new SqlConnection(ConnectionString);
+    var result = -1;
+    using var connection = new SqlConnection(this._connectionString);
     connection.Open();
     try {
-      connection.Execute("truncate table apple_podcasts");
+      var parameters = new DynamicParameters();
+      parameters.Add("@result", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+      connection.Query("sp_start_scan", parameters, commandType: CommandType.StoredProcedure);
+      result = parameters.Get<Int32>("@result");
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
+  }
+
+  public void StopScan(Int32 scanId)
+  {
+    using var connection = new SqlConnection(this._connectionString);
+    connection.Open();
+    try {
+      var parameters = new
+      {
+        id = scanId
+      };
+      connection.Query("sp_stop_scan", parameters, commandType: CommandType.StoredProcedure);
     }
     catch (Exception e) {
       Console.WriteLine(e.Message);
@@ -23,10 +47,46 @@ public class SqlServerReaderWriter
     }
   }
 
-  public static Int32 CountCollectionIds()
+  public List<String> SelectActiveCollectionIds()
+  {
+    var result = new List<String>();
+    using var connection = new SqlConnection(this._connectionString);
+    connection.Open();
+    try {
+      var parameters = new DynamicParameters();
+      result = connection.Query<String>("sp_select_active_collection_ids", commandType: CommandType.StoredProcedure).ToList();
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
+  }
+
+  public List<String> SelectRetiredCollectionIds()
+  {
+    var result = new List<String>();
+    using var connection = new SqlConnection(this._connectionString);
+    connection.Open();
+    try {
+      var parameters = new DynamicParameters();
+      result = connection.Query<String>("sp_select_retired_collection_ids", commandType: CommandType.StoredProcedure).ToList();
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
+  }
+
+  public Int32 CountCollectionIds()
   {
     var result = -1;
-    using var connection = new SqlConnection(ConnectionString);
+    using var connection = new SqlConnection(this._connectionString);
     connection.Open();
     try {
       var parameters = new DynamicParameters();
@@ -43,62 +103,22 @@ public class SqlServerReaderWriter
     return result;
   }
 
-  public static void UpdateCollectionIds(List<String> collectionIds)
-  {
-    using var connection = new SqlConnection(ConnectionString);
-    connection.Open();
-    try {
-      collectionIds.ForEach(collectionId => {
-        var parameters = new
-        {
-          collection_id = collectionId
-        };
-        connection.Query("sp_insert_collection_id", parameters, commandType: CommandType.StoredProcedure);
-      });
-    }
-    catch (Exception e) {
-      Console.WriteLine(e.Message);
-    }
-    finally {
-      connection.Close();
-    }
-  }
-
-  public static void InsertOrUpdateCollectionIds(List<String> collectionIds)
-  {
-    using var connection = new SqlConnection(ConnectionString);
-    connection.Open();
-    try {
-      collectionIds.ForEach(collectionId => {
-        var parameters = new
-        {
-          collection_id = collectionId
-        };
-        connection.Query("sp_insert_or_update_collection_id", parameters, commandType: CommandType.StoredProcedure);
-      });
-    }
-    catch (Exception e) {
-      Console.WriteLine(e.Message);
-    }
-    finally {
-      connection.Close();
-    }
-  }
-
-  public static void FastInsertCollectionIds(List<String> collectionIds)
+  public void InsertCollectionIds(Int32 id, List<String> collectionIds)
   {
     var table = new DataTable();
-    table.Columns.Add("CollectionId", typeof(String));
-    collectionIds.ForEach(collectionId => table.Rows.Add(new Object[] { collectionId }));
+    table.Columns.Add("collection_id", typeof(String));
+    table.Columns.Add("discovered", typeof(String));
+    collectionIds.ForEach(collectionId => table.Rows.Add(new Object[] { collectionId, id }));
 
-    using var connection = new SqlConnection(ConnectionString);
+    using var connection = new SqlConnection(this._connectionString);
     connection.Open();
     var transaction = connection.BeginTransaction();
     try {
       var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.TableLock, transaction);
       bulkCopy.BatchSize = 1000;
       bulkCopy.DestinationTableName = "apple_podcasts";
-      bulkCopy.ColumnMappings.Add("CollectionId", "collection_id");
+      bulkCopy.ColumnMappings.Add("collection_id", "collection_id");
+      bulkCopy.ColumnMappings.Add("discovered", "discovered");
       bulkCopy.WriteToServer(table);
       transaction.Commit();
     }
@@ -111,61 +131,43 @@ public class SqlServerReaderWriter
     }
   }
 
-  public static void InsertOrUpdate(List<Podcast> podcasts)
+  public void RetireCollectionIds(Int32 id, List<String> collectionIds)
   {
-    using var connection = new SqlConnection(ConnectionString);
-    connection.Open();
-    try {
-      podcasts.ForEach(podcast => {
-        var parameters = new
-        {
-          collection_id = podcast.CollectionId,
-          collection_name = podcast.CollectionName,
-          feed_url = podcast.FeedUrl
-        };
-        connection.Query("sp_insert_collection_id", parameters, commandType: CommandType.StoredProcedure);
-      });
-    }
-    catch (Exception e) {
-      Console.WriteLine(e.Message);
-    }
-    finally {
-      connection.Close();
+    if (collectionIds.Count > 0) {
+      using var connection = new SqlConnection(this._connectionString);
+      connection.Open();
+      var transaction = connection.BeginTransaction();
+      try {
+        collectionIds.ForEach(collectionId => {
+          var parameters = new
+          {
+            collection_id = collectionId,
+            scan_id = id
+          };
+          connection.Query<String>("sp_retire_collection_id", parameters, transaction, commandType: CommandType.StoredProcedure);
+        });
+        transaction.Commit();
+      }
+      catch (Exception e) {
+        Console.WriteLine(e.Message);
+        transaction.Rollback();
+      }
+      finally {
+        connection.Close();
+      }
     }
   }
 
-  public static void FastInsertOrUpdate(List<Podcast> podcasts)
-  {
-    using var connection = new SqlConnection(ConnectionString);
-    connection.Open();
-    var transaction = connection.BeginTransaction();
-    try {
-      var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.TableLock, transaction);
-      bulkCopy.BatchSize = 1000;
-      bulkCopy.DestinationTableName = "apple_podcasts";
-      bulkCopy.ColumnMappings.Add("CollectionId", "collection_id");
-      bulkCopy.ColumnMappings.Add("CollectionName", "collection_name");
-      bulkCopy.ColumnMappings.Add("FeedUrl", "feed_url");
-      bulkCopy.WriteToServer(podcasts.AsDataTable());
-      transaction.Commit();
-    }
-    catch (Exception e) {
-      Console.WriteLine(e.Message);
-      transaction.Rollback();
-    }
-    finally {
-      connection.Close();
-    }
-  }
-
-  public static List<String> SelectIncomingCollectionIds()
+  public List<String> SelectIncomingCollectionIds(Int32 count)
   {
     var result = new List<String>();
-    using var connection = new SqlConnection(ConnectionString);
+    using var connection = new SqlConnection(this._connectionString);
     connection.Open();
     try {
-      var parameters = new DynamicParameters();
-      parameters.Add("@result", dbType: DbType.String, direction: ParameterDirection.ReturnValue);
+      var parameters = new
+      {
+        size = count
+      };
       result = connection.Query<String>("sp_select_incoming_collection_ids", parameters, commandType: CommandType.StoredProcedure).ToList();
     }
     catch (Exception e) {
@@ -177,14 +179,16 @@ public class SqlServerReaderWriter
     return result;
   }
 
-  public static List<String> SelectPendingCollectionIds()
+  public List<String> SelectPendingCollectionIds(Int32 count)
   {
     var result = new List<String>();
-    using var connection = new SqlConnection(ConnectionString);
+    using var connection = new SqlConnection(this._connectionString);
     connection.Open();
     try {
-      var parameters = new DynamicParameters();
-      parameters.Add("@result", dbType: DbType.String, direction: ParameterDirection.ReturnValue);
+      var parameters = new
+      {
+        size = count
+      };
       result = connection.Query<String>("sp_select_pending_collection_ids", parameters, commandType: CommandType.StoredProcedure).ToList();
     }
     catch (Exception e) {
@@ -196,15 +200,18 @@ public class SqlServerReaderWriter
     return result;
   }
 
-  public static List<String> SelectAbandonedCollectionIds()
+  public void UpdateCollection(Collection collection)
   {
-    var result = new List<String>();
-    using var connection = new SqlConnection(ConnectionString);
+    using var connection = new SqlConnection(this._connectionString);
     connection.Open();
     try {
-      var parameters = new DynamicParameters();
-      parameters.Add("@result", dbType: DbType.String, direction: ParameterDirection.ReturnValue);
-      result = connection.Query<String>("sp_select_abandoned_collection_ids", parameters, commandType: CommandType.StoredProcedure).ToList();
+      var parameters = new
+      {
+        collectionId = collection.CollectionId,
+        collectionName = collection.CollectionName,
+        feedUrl = collection.FeedUrl
+      };
+      connection.Query<String>("sp_update_collection", parameters, commandType: CommandType.StoredProcedure);
     }
     catch (Exception e) {
       Console.WriteLine(e.Message);
@@ -212,16 +219,18 @@ public class SqlServerReaderWriter
     finally {
       connection.Close();
     }
-    return result;
   }
 
-  public static List<Podcast> SelectAll()
+  public void UpdateFailedCollection(String collectionId)
   {
-    var result = new List<Podcast>();
-    using var connection = new SqlConnection(ConnectionString);
+    using var connection = new SqlConnection(this._connectionString);
     connection.Open();
     try {
-      result = connection.Query<Podcast>("sp_select_all", commandType: CommandType.StoredProcedure).ToList();
+      var parameters = new
+      {
+        p_collection_id = collectionId
+      };
+      connection.Query<String>("sp_update_failed_collection", parameters, commandType: CommandType.StoredProcedure);
     }
     catch (Exception e) {
       Console.WriteLine(e.Message);
@@ -229,6 +238,29 @@ public class SqlServerReaderWriter
     finally {
       connection.Close();
     }
-    return result;
   }
+
+  // public void Insert(List<Podcast> podcasts)
+  // {
+  //   using var connection = new SqlConnection(this._connectionString);
+  //   connection.Open();
+  //   var transaction = connection.BeginTransaction();
+  //   try {
+  //     var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.TableLock, transaction);
+  //     bulkCopy.BatchSize = 1000;
+  //     bulkCopy.DestinationTableName = "apple_podcasts";
+  //     bulkCopy.ColumnMappings.Add("CollectionId", "collection_id");
+  //     bulkCopy.ColumnMappings.Add("CollectionName", "collection_name");
+  //     bulkCopy.ColumnMappings.Add("FeedUrl", "feed_url");
+  //     bulkCopy.WriteToServer(podcasts.AsDataTable());
+  //     transaction.Commit();
+  //   }
+  //   catch (Exception e) {
+  //     Console.WriteLine(e.Message);
+  //     transaction.Rollback();
+  //   }
+  //   finally {
+  //     connection.Close();
+  //   }
+  // }
 }

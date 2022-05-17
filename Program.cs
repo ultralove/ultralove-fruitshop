@@ -1,12 +1,20 @@
-﻿using Ultralove;
+﻿using System.Reflection;
 
-Console.WriteLine($"Found {SqlServerReaderWriter.CountCollectionIds()} podcasts in the database.");
-var items = AppleScanner.ReadCollectionIds("https://podcasts.apple.com/de/genre/podcasts/id26");
-Console.WriteLine($"Found {items.Count} podcasts in Apple Podcasts.");
-if (SqlServerReaderWriter.CountCollectionIds() == 0) {
-  SqlServerReaderWriter.FastInsertCollectionIds(items.ToList());
+namespace Ultralove;
+
+[Command(Name = "fruitshop"), Subcommand(typeof(ScanCommand), typeof(ResolveCommand))]
+[VersionOptionFromMember("--version", MemberName = nameof(GetVersion))]
+[HelpOption("--help")]
+
+internal class Program
+{
+  public static void Main(String[] args) => CommandLineApplication.Execute<Program>(args);
+
+  public void OnExecute(CommandLineApplication app)
+  {
+    app.ShowHelp();
+  }
+
+  private static String GetVersion()
+  => "fruitshop v" + typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
 }
-else {
-  SqlServerReaderWriter.InsertOrUpdateCollectionIds(items.ToList());
-}
-Console.WriteLine($"Saved {SqlServerReaderWriter.CountCollectionIds()} to database.");
