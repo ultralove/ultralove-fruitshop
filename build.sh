@@ -67,11 +67,20 @@ fi
 
 FRUITSHOP_RUNTIME_PLATFORM=$(uname)
 if [ "$FRUITSHOP_RUNTIME_PLATFORM" == "Darwin" ]; then
-  FASTSPEC_RUNTIME_ID="osx-x64"
+  FRUITSHOP_RUNTIME_ARCHITECTURE=$(uname -m)
+  if [ "$FRUITSHOP_RUNTIME_ARCHITECTURE" == "arm64" ]; then
+    # app crashes when built for osx-arm64 with dotnet 7 preview-4
+    # FRUITSHOP_RUNTIME_ID="osx-arm64"
+    FRUITSHOP_RUNTIME_ID="osx-x64"
+  else
+    FRUITSHOP_RUNTIME_ID="osx-x64"
+  fi
 elif [ "$FRUITSHOP_RUNTIME_PLATFORM" == "Linux" ]; then
   FRUITSHOP_RUNTIME_ID="linux-x64"
 else
   FRUITSHOP_RUNTIME_ID="windows-x64"
 fi
+
+echo "Building for $FRUITSHOP_RUNTIME_ID"
 
 dotnet publish --output "$FRUITSHOP_OUTPUT_DIRECTORY" --runtime "$FRUITSHOP_RUNTIME_ID" --framework "$FRUITSHOP_TARGET_FRAMEWORK" --configuration Release --self-contained true -p:PublishSingleFile=true $FRUITSHOP_BUILD_ARGS

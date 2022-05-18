@@ -1,17 +1,18 @@
 namespace Ultralove;
 
+[Command(Name = "resolve", Description = "Fetch name and feed url for new podcasts.")]
 public class ResolveCommand
 {
-  [Option(LongName = "count", ShortName = "c", Description = "The number of podcasts to resolve (default 100).")]
+  [Option(LongName = "count", ShortName = "c", Description = "Overall number of podcasts to resolve")]
   private Int32 Count { get; set; } = 100;
 
-  [Option(LongName = "size", ShortName = "s", Description = "The number of podcasts to resolve (default 200).")]
-  private Int32 Size { get; set; } = 200;
+  [Option(LongName = "size", ShortName = "s", Description = "Number of podcasts to resolve per batch")]
+  private Int32 Size { get; set; } = 100;
 
-  [Option(LongName = "delay", ShortName = "d", Description = "The number of podcasts to resolve (default 1000ms).")]
+  [Option(LongName = "delay", ShortName = "d", Description = "Duration(ms) of the cool-down phase inbetween batches")]
   private Int32 Delay { get; set; } = 1000;
 
-  [Option(LongName = "no-retries", ShortName = "n", Description = "Don't try to fetch failed requests.")]
+  [Option(LongName = "no-retries", ShortName = "n", Description = "Don't retry failed resolve requests.")]
   private Boolean NoRetries { get; set; } = false;
 
   public void OnExecute()
