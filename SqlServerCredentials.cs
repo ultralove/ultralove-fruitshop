@@ -1,4 +1,4 @@
-namespace Ultralove;
+namespace Fruitshop;
 
 public static class SqlServerCredentials
 {

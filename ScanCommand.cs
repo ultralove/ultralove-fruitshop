@@ -1,4 +1,4 @@
-namespace Ultralove;
+namespace Fruitshop;
 
 [Command(Name = "scan", Description = "Scan Apple Podcasts directory for new podcasts.")]
 public class ScanCommand

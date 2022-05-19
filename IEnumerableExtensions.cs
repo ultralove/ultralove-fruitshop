@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Data;
 
-namespace Ultralove;
+namespace Fruitshop;
 
 public static class IEnumerableExtensions
 {

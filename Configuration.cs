@@ -1,4 +1,4 @@
-namespace Ultralove;
+namespace Fruitshop;
 
 public sealed class Configuration
 {
@@ -53,5 +53,5 @@ public sealed class Configuration
     public String DatabaseEngine { get; set; } = "mssql";
   }
 
-  private static Values s_values = new();
+  private static readonly Values s_values = new();
 }

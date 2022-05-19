@@ -1,4 +1,4 @@
-namespace Ultralove;
+namespace Fruitshop;
 
 public class Repository
 {

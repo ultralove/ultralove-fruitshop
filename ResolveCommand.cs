@@ -1,4 +1,4 @@
-namespace Ultralove;
+namespace Fruitshop;
 
 [Command(Name = "resolve", Description = "Fetch name and feed url for new podcasts.")]
 public class ResolveCommand

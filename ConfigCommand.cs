@@ -1,4 +1,4 @@
-namespace Ultralove;
+namespace Fruitshop;
 
 [Command(Name = "config", Description = "Override configuration values.")]
 public class ConfigCommand

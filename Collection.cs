@@ -1,6 +1,4 @@
-using System.Text.Json.Serialization;
-
-namespace Ultralove;
+namespace Fruitshop;
 
 public class Collection
 {

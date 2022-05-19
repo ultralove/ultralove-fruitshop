@@ -1,6 +1,6 @@
 using HtmlAgilityPack;
 
-namespace Ultralove;
+namespace Fruitshop;
 
 public class Scanner
 {

@@ -1,6 +1,6 @@
 using FileHelpers;
 
-namespace Ultralove;
+namespace Fruitshop;
 
 [DelimitedRecord(";")]
 public class FileRecord

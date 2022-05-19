@@ -2,7 +2,7 @@ using System.Data;
 using System.Data.SqlClient;
 using Dapper;
 
-namespace Ultralove;
+namespace Fruitshop;
 
 public class SqlServerReaderWriter
 {

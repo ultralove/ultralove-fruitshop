@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Ultralove;
+namespace Fruitshop;
 
 [Command(Name = "fruitshop"), Subcommand(typeof(ScanCommand), typeof(ResolveCommand), typeof(ConfigCommand))]
 [VersionOptionFromMember("--version", MemberName = nameof(GetVersion))]
