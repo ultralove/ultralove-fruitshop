@@ -13,8 +13,11 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="Dapper" Version="2.0.90" />
     <PackageReference Include="FileHelpers" Version="3.5.1" />
+    <!-- <PackageReference Include="Microsoft.DotNet.ILCompiler;runtime.osx-arm64.Microsoft.DotNet.ILCompiler" Version="7.0.0-*" /> -->
   </ItemGroup>
   <ItemGroup>
+    <Using Include="System.Text.Json" />
+    <Using Include="System.Text.Json.Serialization" />
     <Using Include="McMaster.Extensions.CommandLineUtils" />
   </ItemGroup>
 

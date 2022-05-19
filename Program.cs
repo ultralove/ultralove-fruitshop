@@ -2,7 +2,7 @@
 
 namespace Ultralove;
 
-[Command(Name = "fruitshop"), Subcommand(typeof(ScanCommand), typeof(ResolveCommand))]
+[Command(Name = "fruitshop"), Subcommand(typeof(ScanCommand), typeof(ResolveCommand), typeof(ConfigCommand))]
 [VersionOptionFromMember("--version", MemberName = nameof(GetVersion))]
 [HelpOption("--help")]
 
