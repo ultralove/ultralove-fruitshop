@@ -9,7 +9,6 @@ public class Resolver
   {
     var result = new List<Collection>();
     if (collectionIds.Count > 0) {
-      // var url = $"https://itunes.apple.com/lookup?id={podcastId[2..(podcastId.Length)]}";
       var url = BuildRequestUrl(collectionIds);
       Task.Run(async () => result = await RequestCollections(url)).Wait();
     }
@@ -34,7 +33,7 @@ public class Resolver
     s_client.DefaultRequestHeaders.Accept.Clear();
     s_client.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
-    s_client.DefaultRequestHeaders.Add("User-Agent", "ultralove apple podcasts scanner v1.0.0");
+    s_client.DefaultRequestHeaders.Add("User-Agent", "ultralove fruitshop v1.0.0");
     try {
       var json = await s_client.GetStringAsync(url);
       using var document = JsonDocument.Parse(json);
