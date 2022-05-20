@@ -2,10 +2,10 @@ namespace Fruitshop;
 
 public sealed class Configuration
 {
-  public static String StorePath
+  public static String StoragePath
   {
-    get => s_values.StorePath;
-    set => s_values.StorePath = value;
+    get => s_values.StoragePath;
+    set => s_values.StoragePath = value;
   }
 
   public static String DatabaseEngine
@@ -37,8 +37,8 @@ public sealed class Configuration
         }
       }
     }
-    if (Directory.Exists(StorePath) == false) {
-      _ = Directory.CreateDirectory(StorePath);
+    if (Directory.Exists(StoragePath) == false) {
+      _ = Directory.CreateDirectory(StoragePath);
     }
   }
 
@@ -47,8 +47,8 @@ public sealed class Configuration
 
   private class Values
   {
-    [JsonPropertyName("storePath")]
-    public String StorePath { get; set; } = Path.Combine(DataPath, "store");
+    [JsonPropertyName("storagePath")]
+    public String StoragePath { get; set; } = Path.Combine(DataPath, "storage");
     [JsonPropertyName("databasesEngine")]
     public String DatabaseEngine { get; set; } = "mssql";
   }

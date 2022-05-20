@@ -3,7 +3,7 @@ namespace Fruitshop;
 [Command(Name = "config", Description = "Override configuration values.")]
 public class ConfigCommand
 {
-  [Option(LongName = "storePath", ShortName = "", Description = "Specify the store path.")]
+  [Option(LongName = "storagePath", ShortName = "", Description = "Specify the store path.")]
   private String StorePath { get; set; } = String.Empty;
 
   [Option(LongName = "databaseEngine", ShortName = "", Description = "Specify the database engine.")]
@@ -18,7 +18,7 @@ public class ConfigCommand
   public void OnExecute()
   {
     if (String.IsNullOrEmpty(this.StorePath) == false) {
-      Configuration.StorePath = this.StorePath;
+      Configuration.StoragePath = this.StorePath;
     }
     if (String.IsNullOrEmpty(this.DatabaseEngine) == false) {
       Configuration.DatabaseEngine = this.DatabaseEngine;
@@ -27,8 +27,8 @@ public class ConfigCommand
       Configuration.Dump();
     }
     if (this.Get) {
-      Console.WriteLine($"StorePath:      {Configuration.StorePath}");
       Console.WriteLine($"DatabaseEngine: {Configuration.DatabaseEngine}");
+      Console.WriteLine($"StoragePath:    {Configuration.StoragePath}");
     }
   }
 }
