@@ -2,32 +2,33 @@ USE master;
 GO
 
 -- initialize database
-DROP DATABASE IF EXISTS applepodcasts;
+DROP DATABASE IF EXISTS fruitshop;
 GO
 
-CREATE DATABASE applepodcasts ON
-  (NAME = applepodcastsdata, FILENAME = '/var/opt/mssql/data/applepodcasts.mdf', SIZE = 1GB, FILEGROWTH=1GB)
+CREATE DATABASE fruitshop ON
+  (NAME = fruitshopdata, FILENAME = '/var/opt/mssql/data/fruitshop.mdf', SIZE = 1GB, FILEGROWTH=1GB)
 LOG ON
-  (NAME = applepodcastslog, FILENAME = '/var/opt/mssql/data/applepodcasts.ldf', SIZE = 1GB, FILEGROWTH=1GB);
+  (NAME = fruitshoplog, FILENAME = '/var/opt/mssql/data/fruitshop.ldf', SIZE = 1GB, FILEGROWTH=1GB);
 GO
 
-USE applepodcasts;
+USE fruitshop;
 GO
 
 -- initialize credentials
-IF EXISTS (SELECT name FROM master.sys.server_principals
-WHERE name = 'applepodcasts')
+IF EXISTS (SELECT name
+FROM master.sys.server_principals
+WHERE name = 'fruitshop')
 BEGIN
-  DROP LOGIN applepodcasts;
+  DROP LOGIN fruitshop;
 END;
 GO
 
-CREATE LOGIN applepodcasts with password = N'Apple!podcasts0';
+CREATE LOGIN fruitshop with password = N'Fruit!shop0';
 GO
 
-DROP USER IF EXISTS applepodcasts;
+DROP USER IF EXISTS fruitshop;
 GO
 
 -- initialize user
-CREATE USER applepodcasts FOR LOGIN applepodcasts;
+CREATE USER fruitshop FOR LOGIN fruitshop;
 GO

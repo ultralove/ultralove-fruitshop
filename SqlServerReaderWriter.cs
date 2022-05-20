@@ -107,18 +107,18 @@ public class SqlServerReaderWriter
   {
     var table = new DataTable();
     table.Columns.Add("collection_id", typeof(String));
-    table.Columns.Add("discovered", typeof(String));
+    table.Columns.Add("scan_id", typeof(String));
     collectionIds.ForEach(collectionId => table.Rows.Add(new Object[] { collectionId, id }));
 
     using var connection = new SqlConnection(this._connectionString);
     connection.Open();
-    var transaction = connection.BeginTransaction();
+    using var transaction = connection.BeginTransaction();
     try {
       var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.TableLock, transaction);
       bulkCopy.BatchSize = 1000;
-      bulkCopy.DestinationTableName = "apple_podcasts";
+      bulkCopy.DestinationTableName = "fruitshop_collections";
       bulkCopy.ColumnMappings.Add("collection_id", "collection_id");
-      bulkCopy.ColumnMappings.Add("discovered", "discovered");
+      bulkCopy.ColumnMappings.Add("scan_id", "scan_id");
       bulkCopy.WriteToServer(table);
       transaction.Commit();
     }
@@ -248,7 +248,7 @@ public class SqlServerReaderWriter
   //   try {
   //     var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.TableLock, transaction);
   //     bulkCopy.BatchSize = 1000;
-  //     bulkCopy.DestinationTableName = "apple_podcasts";
+  //     bulkCopy.DestinationTableName = "fruitshop-collections";
   //     bulkCopy.ColumnMappings.Add("CollectionId", "collection_id");
   //     bulkCopy.ColumnMappings.Add("CollectionName", "collection_name");
   //     bulkCopy.ColumnMappings.Add("FeedUrl", "feed_url");
