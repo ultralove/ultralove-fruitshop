@@ -2,7 +2,7 @@
 
 namespace Fruitshop;
 
-[Command(Name = "fruitshop"), Subcommand(typeof(ScanCommand), typeof(ResolveCommand), typeof(ConfigCommand))]
+[Command(Name = "fruitshop"), Subcommand(typeof(ScanCommand), typeof(ResolveCommand), typeof(ConfigCommand), typeof(StatusCommand))]
 [VersionOptionFromMember("--version", MemberName = nameof(GetVersion))]
 [HelpOption("--help")]
 

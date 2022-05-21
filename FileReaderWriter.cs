@@ -5,28 +5,28 @@ namespace Fruitshop;
 
 public class FileReaderWriter
 {
-  public static void ExportPodcasts(String filePath, List<Podcast> podcasts)
+  public static void ExportPodcasts(String filePath, List<Collection> collections)
   {
     try {
-      var engine = new FileHelperEngine<Podcast>(Encoding.UTF8);
-      engine.WriteFile(filePath, podcasts);
+      var engine = new FileHelperEngine<Collection>(Encoding.UTF8);
+      engine.WriteFile(filePath, collections);
     }
     catch (Exception e) {
       Console.WriteLine(e.Message);
     }
   }
 
-  public static List<Podcast> ImportPodcasts(String filePath)
+  public static List<Collection> ImportPodcasts(String filePath)
   {
-    var podcasts = new List<Podcast>();
+    var collections = new List<Collection>();
     try {
-      var engine = new FileHelperEngine<Podcast>(Encoding.UTF8);
-      podcasts = engine.ReadFile(filePath).ToList();
+      var engine = new FileHelperEngine<Collection>(Encoding.UTF8);
+      collections = engine.ReadFile(filePath).ToList();
     }
     catch (Exception e) {
       Console.WriteLine(e.Message);
-      podcasts.Clear();
+      collections.Clear();
     }
-    return podcasts;
+    return collections;
   }
 }

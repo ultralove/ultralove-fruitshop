@@ -65,6 +65,27 @@ public class SqlServerReaderWriter
     return result;
   }
 
+  public Int32 CountActiveCollectionIds()
+  {
+    var result = -1;
+    using var connection = new SqlConnection(this._connectionString);
+    connection.Open();
+    try {
+      var parameters = new DynamicParameters();
+      parameters.Add("@result", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+      connection.Query("sp_count_active_collection_ids", parameters, commandType: CommandType.StoredProcedure);
+      result = parameters.Get<Int32>("@result");
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
+  }
+
+
   public List<String> SelectRetiredCollectionIds()
   {
     var result = new List<String>();
@@ -73,6 +94,26 @@ public class SqlServerReaderWriter
     try {
       var parameters = new DynamicParameters();
       result = connection.Query<String>("sp_select_retired_collection_ids", commandType: CommandType.StoredProcedure).ToList();
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
+  }
+
+  public Int32 CountRetiredCollectionIds()
+  {
+    var result = -1;
+    using var connection = new SqlConnection(this._connectionString);
+    connection.Open();
+    try {
+      var parameters = new DynamicParameters();
+      parameters.Add("@result", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+      connection.Query("sp_count_retired_collection_ids", parameters, commandType: CommandType.StoredProcedure);
+      result = parameters.Get<Int32>("@result");
     }
     catch (Exception e) {
       Console.WriteLine(e.Message);
@@ -179,6 +220,26 @@ public class SqlServerReaderWriter
     return result;
   }
 
+  public Int32 CountIncomingCollectionIds()
+  {
+    var result = -1;
+    using var connection = new SqlConnection(this._connectionString);
+    connection.Open();
+    try {
+      var parameters = new DynamicParameters();
+      parameters.Add("@result", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+      connection.Query("sp_count_incoming_collection_ids", parameters, commandType: CommandType.StoredProcedure);
+      result = parameters.Get<Int32>("@result");
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
+  }
+
   public List<String> SelectPendingCollectionIds(Int32 count)
   {
     var result = new List<String>();
@@ -190,6 +251,26 @@ public class SqlServerReaderWriter
         size = count
       };
       result = connection.Query<String>("sp_select_pending_collection_ids", parameters, commandType: CommandType.StoredProcedure).ToList();
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
+  }
+
+  public Int32 CountPendingCollectionIds()
+  {
+    var result = -1;
+    using var connection = new SqlConnection(this._connectionString);
+    connection.Open();
+    try {
+      var parameters = new DynamicParameters();
+      parameters.Add("@result", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+      connection.Query("sp_count_pending_collection_ids", parameters, commandType: CommandType.StoredProcedure);
+      result = parameters.Get<Int32>("@result");
     }
     catch (Exception e) {
       Console.WriteLine(e.Message);

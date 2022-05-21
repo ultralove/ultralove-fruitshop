@@ -25,32 +25,38 @@ public class ResolveCommand
     var overallLoss = 0;
     var batchCount = 0;
 
-    while (collectionIds.Count > 0) {
-      var timestamp = DateTime.Now;
-      var successfulCollections = new List<String>();
-      var batch = collectionIds.Take(this.Size).ToList();
-      var collections = Resolver.LookupCollections(batch);
-      collections.ForEach(collection => {
-        Repository.UpdateCollection(collection);
-        successfulCollections.Add(collection.CollectionId);
-      });
-      collectionIds.RemoveRange(0, batch.Count);
+    try {
+      while (collectionIds.Count > 0) {
+        var timestamp = DateTime.Now;
+        var successfulCollections = new List<String>();
+        var batch = collectionIds.Take(this.Size).ToList();
+        var collections = Resolver.LookupCollections(batch);
+        collections.ForEach(collection => {
+          Repository.UpdateCollection(collection);
+          successfulCollections.Add(collection.CollectionId);
+        });
+        collectionIds.RemoveRange(0, batch.Count);
 
-      var failedCollections = batch.Except(successfulCollections).ToList();
-      failedCollections.ForEach(failedCollection => {
-        Repository.UpdateFailedCollection(failedCollection);
-      });
+        var failedCollections = batch.Except(successfulCollections).ToList();
+        failedCollections.ForEach(failedCollection => {
+          Repository.UpdateFailedCollection(failedCollection);
+        });
 
-      ++batchCount;
-      overallRequested += batch.Count;
-      overallLoss += failedCollections.Count;
-      Console.WriteLine($"{batchCount}: {successfulCollections.Count} of {batch.Count} collections resolved in {(DateTime.Now - timestamp).TotalMilliseconds}ms.");
+        ++batchCount;
+        overallRequested += batch.Count;
+        overallLoss += failedCollections.Count;
+        Console.WriteLine($"{batchCount}: {successfulCollections.Count} of {batch.Count} collections resolved in {(DateTime.Now - timestamp).TotalMilliseconds}ms.");
 
-      this.CoolDown(timestamp);
+        this.CoolDown(timestamp);
+      }
+
+      var overallLossPercent = ((Double)overallLoss / (Double)(overallRequested)) * 100;
+      Console.WriteLine($"{overallLossPercent:0.00}% collection requests failed.");
     }
-
-    var overallLossPercent = ((Double)overallLoss / (Double)(overallRequested)) * 100;
-    Console.WriteLine($"{overallLossPercent:0.00}% collection requests failed.");
+    // Catch network errors
+    catch (Exception e) {
+      Console.WriteLine($"Error: {e.Message}");
+    }
   }
 
   private List<String> CollectionIds => (this.NoRetries == true) ? Repository.SelectIncomingCollectionIds(this.Count) : Repository.SelectPendingCollectionIds(this.Count);

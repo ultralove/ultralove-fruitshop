@@ -30,6 +30,7 @@ public class Scanner
   {
     var categories = new ConcurrentHashSet<String>();
     if (TryLoadDocument(url, out var document)) {
+      Console.WriteLine($"Scanning {url}...");
       Parallel.ForEach(document!.DocumentNode.SelectNodes("//a[@href]"), link => {
         var href = link.Attributes["href"].Value;
         if (href.StartsWith("https://podcasts.apple.com/de/genre/podcasts-")) {
@@ -44,6 +45,7 @@ public class Scanner
   {
     var pages = new ConcurrentHashSet<String>();
     if (TryLoadDocument(url, out var document)) {
+      Console.WriteLine($"Scanning {url}...");
       Parallel.ForEach(document!.DocumentNode.SelectNodes("//a[@href]"), link => {
         var href = link.Attributes["href"].Value;
         if (href.Contains("?letter=")) {
@@ -71,6 +73,7 @@ public class Scanner
   {
     var result = "";
     if (TryLoadDocument(url, out var document)) {
+      Console.WriteLine($"Scanning {url}...");
       var nodes = document!.DocumentNode.SelectNodes("//a[@href]");
       foreach (var node in nodes) {
         var href = node.GetAttributeValue("href", null);
@@ -89,9 +92,11 @@ public class Scanner
 
   public static (List<String> ids, Boolean completed) ReadPodcasts(String url)
   {
+    Console.WriteLine($"Scanning {url}...");
     var completed = true;
     var ids = new List<String>();
     if (TryLoadDocument(url, out var document)) {
+      Console.WriteLine($"Scanning {url}...");
       var nodes = document!.DocumentNode.SelectNodes("//a[@href]");
       foreach (var node in nodes) {
         var href = node.GetAttributeValue("href", null);
