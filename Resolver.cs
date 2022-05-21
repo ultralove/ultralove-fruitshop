@@ -29,11 +29,11 @@ public class Resolver
 
   private static async Task<List<Collection>> RequestCollections(String url)
   {
-    var podcasts = new List<Collection>();
+    var collections = new List<Collection>();
     s_client.DefaultRequestHeaders.Accept.Clear();
     s_client.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
-    s_client.DefaultRequestHeaders.Add("User-Agent", "ultralove fruitshop v1.0.0");
+    s_client.DefaultRequestHeaders.Add("User-Agent", Configuration.UserAgent);
     try {
       var json = await s_client.GetStringAsync(url);
       using var document = JsonDocument.Parse(json);
@@ -44,7 +44,7 @@ public class Resolver
           if (results[i].TryGetProperty("collectionId", out var collectionId)) {
             if (results[i].TryGetProperty("collectionName", out var collectionName)) {
               if (results[i].TryGetProperty("feedUrl", out var feedUrl)) {
-                podcasts.Add(new Collection { CollectionId = collectionId.GetInt32().ToString(), CollectionName = collectionName.GetString(), FeedUrl = feedUrl.GetString() });
+                collections.Add(new Collection { CollectionId = collectionId.GetInt32().ToString(), CollectionName = collectionName.GetString(), FeedUrl = feedUrl.GetString() });
               }
             }
           }
@@ -61,16 +61,7 @@ public class Resolver
     catch (ArgumentNullException e) {
       Console.WriteLine($"{e.Message}");
     }
-    // GetStreamAsync
-    catch (InvalidOperationException e) {
-      Console.WriteLine($"{e.Message}");
-    }
-    catch (HttpRequestException e) {
-      Console.WriteLine($"{e.Message}");
-    }
-    catch (TaskCanceledException e) {
-      Console.WriteLine($"{e.Message}");
-    }
-    return podcasts;
+    // Pass on network errors...
+    return collections;
   }
 }

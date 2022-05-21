@@ -4,10 +4,13 @@ namespace Fruitshop;
 public class ConfigCommand
 {
   [Option(LongName = "storagePath", ShortName = "", Description = "Specify the store path.")]
-  private String StorePath { get; set; } = String.Empty;
+  private String StoragePath { get; set; } = String.Empty;
 
   [Option(LongName = "databaseEngine", ShortName = "", Description = "Specify the database engine.")]
   private String DatabaseEngine { get; set; } = String.Empty;
+
+  [Option(LongName = "userAgent", ShortName = "", Description = "Specify the user agent for http requests.")]
+  private String UserAgent { get; set; } = String.Empty;
 
   [Option(LongName = "dump", ShortName = "d", Description = "Write current configuration to file.")]
   private Boolean Dump { get; set; } = false;
@@ -17,11 +20,14 @@ public class ConfigCommand
 
   public void OnExecute()
   {
-    if (String.IsNullOrEmpty(this.StorePath) == false) {
-      Configuration.StoragePath = this.StorePath;
+    if (String.IsNullOrEmpty(this.StoragePath) == false) {
+      Configuration.StoragePath = this.StoragePath;
     }
     if (String.IsNullOrEmpty(this.DatabaseEngine) == false) {
       Configuration.DatabaseEngine = this.DatabaseEngine;
+    }
+    if (String.IsNullOrEmpty(this.UserAgent) == false) {
+      Configuration.UserAgent = this.UserAgent;
     }
     if (this.Dump == true) {
       Configuration.Dump();
