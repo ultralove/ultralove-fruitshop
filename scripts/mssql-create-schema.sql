@@ -91,7 +91,7 @@ GO
 CREATE TABLE fruitshop_collections
 (
   id UNIQUEIDENTIFIER DEFAULT NEWID(),
-  collection_id NVARCHAR(32) NOT NULL,
+  collection_id NVARCHAR(32) NOT NULL UNIQUE,
   collection_name NVARCHAR(1024),
   feed_url NVARCHAR(1024),
   scan_id INT NOT NULL REFERENCES fruitshop_scans (id),
@@ -107,6 +107,22 @@ GO
 -- GO
 
 CREATE UNIQUE CLUSTERED INDEX ix_fruitshop_collection_id_scan_id ON fruitshop_collections (collection_id, scan_id);
+GO
+
+-- sp_select_collection_ids
+DROP PROCEDURE IF EXISTS sp_select_collection_ids;
+GO
+
+CREATE PROCEDURE sp_select_collection_ids
+AS
+BEGIN
+  SET NOCOUNT ON
+  SELECT collection_id
+  FROM fruitshop_collections;
+END;
+GO
+
+GRANT EXECUTE ON sp_select_collection_ids TO fruitshop;
 GO
 
 -- sp_count_collection_ids
@@ -154,7 +170,7 @@ BEGIN
   SET NOCOUNT ON
   SELECT collection_id
   FROM fruitshop_collections
-  WHERE retired < 0;
+  WHERE (retired = -1) AND (retry_count >= -4);
 END;
 GO
 
@@ -172,7 +188,7 @@ BEGIN
   DECLARE @count INT = -1;
   SELECT @count = COUNT(collection_id)
   FROM fruitshop_collections
-  WHERE retired < 0;
+  WHERE (retired = -1) AND (retry_count >= -4);
   RETURN @count;
 END;
 GO
@@ -190,7 +206,7 @@ BEGIN
   SET NOCOUNT ON
   SELECT collection_id
   FROM fruitshop_collections
-  WHERE retired >= 0;
+  WHERE (retired > 0) OR (retry_count < -4);
 END;
 GO
 
@@ -208,7 +224,7 @@ BEGIN
   DECLARE @count INT = -1;
   SELECT @count = COUNT(collection_id)
   FROM fruitshop_collections
-  WHERE retired >= 0;
+  WHERE (retired > 0) OR (retry_count < -4);
   RETURN @count;
 END;
 GO
@@ -228,7 +244,7 @@ BEGIN
   SELECT TOP(@size)
     collection_id
   FROM fruitshop_collections
-  WHERE retry_count = -1
+  WHERE (retired = -1) AND (retry_count = -1)
 END;
 GO
 
@@ -246,7 +262,7 @@ BEGIN
   DECLARE @count INT = -1;
   SELECT @count = COUNT(collection_id)
   FROM fruitshop_collections
-  WHERE retry_count = -1;
+  WHERE (retired = -1) AND (retry_count = -1);
   RETURN @count;
 END;
 GO
@@ -266,7 +282,7 @@ BEGIN
   SELECT TOP(@size)
     collection_id
   FROM fruitshop_collections
-  WHERE (retry_count < 0) AND (retry_count > -5)
+  WHERE (retired = -1) AND (retry_count < 0) AND (retry_count >= -4)
 END;
 GO
 
@@ -284,7 +300,7 @@ BEGIN
   DECLARE @count INT = -1;
   SELECT @count = COUNT(collection_id)
   FROM fruitshop_collections
-  WHERE (retry_count < 0) AND (retry_count > -5);
+  WHERE (retired = -1) AND (retry_count < 0) AND (retry_count >= -4);
   RETURN @count;
 END;
 GO
@@ -328,4 +344,24 @@ END;
 GO
 
 GRANT EXECUTE ON sp_update_failed_collection TO fruitshop;
+GO
+
+-- sp_find_any_collection
+DROP PROCEDURE IF EXISTS sp_find_any_collection;
+GO
+
+CREATE PROCEDURE sp_find_any_collection
+  @pattern NVARCHAR(256)
+AS
+BEGIN
+  SET NOCOUNT ON
+  DECLARE @filter NVARCHAR(256);
+  SELECT @filter = '%' + @pattern + '%';
+  SELECT collection_id, collection_name, feed_url
+  FROM fruitshop_collections
+  WHERE collection_id LIKE @filter OR collection_name LIKE @filter OR feed_url LIKE @filter
+END;
+GO
+
+GRANT EXECUTE ON sp_find_any_collection TO fruitshop;
 GO
