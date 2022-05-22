@@ -35,6 +35,7 @@ public class ConfigCommand
     if (this.Get) {
       Console.WriteLine($"DatabaseEngine: {Configuration.DatabaseEngine}");
       Console.WriteLine($"StoragePath:    {Configuration.StoragePath}");
+      Console.WriteLine($"UserAgent:      {Configuration.UserAgent}");
     }
   }
 }
