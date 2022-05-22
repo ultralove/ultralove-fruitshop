@@ -4,7 +4,7 @@ namespace Fruitshop;
 
 public class Resolver
 {
-  private static readonly HttpClient s_client = new();
+  // private static readonly HttpClient s_client = new();
   public static List<Collection> LookupCollections(List<String> collectionIds)
   {
     var result = new List<Collection>();
@@ -30,12 +30,14 @@ public class Resolver
   private static async Task<List<Collection>> RequestCollections(String url)
   {
     var collections = new List<Collection>();
-    s_client.DefaultRequestHeaders.Accept.Clear();
-    s_client.DefaultRequestHeaders.Accept.Add(
+
+    var client = new HttpClient();
+    client.DefaultRequestHeaders.Accept.Clear();
+    client.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
-    s_client.DefaultRequestHeaders.Add("User-Agent", Configuration.UserAgent);
+    client.DefaultRequestHeaders.Add("User-Agent", Configuration.UserAgent);
     try {
-      var json = await s_client.GetStringAsync(url);
+      var json = await client.GetStringAsync(url);
       using var document = JsonDocument.Parse(json);
       var resultCount = document.RootElement.GetProperty("resultCount").GetInt32();
       if (resultCount > 0) {
