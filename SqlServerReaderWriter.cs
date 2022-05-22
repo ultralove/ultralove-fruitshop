@@ -124,6 +124,23 @@ public class SqlServerReaderWriter
     return result;
   }
 
+  public List<String> SelectCollectionIds()
+  {
+    var result = new List<String>();
+    using var connection = new SqlConnection(this._connectionString);
+    connection.Open();
+    try {
+      result = connection.Query<String>("sp_select_collection_ids", commandType: CommandType.StoredProcedure).ToList();
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
+  }
+
   public Int32 CountCollectionIds()
   {
     var result = -1;
@@ -246,10 +263,7 @@ public class SqlServerReaderWriter
     using var connection = new SqlConnection(this._connectionString);
     connection.Open();
     try {
-      var parameters = new
-      {
-        size = count
-      };
+      var parameters = new { size = count };
       result = connection.Query<String>("sp_select_pending_collection_ids", parameters, commandType: CommandType.StoredProcedure).ToList();
     }
     catch (Exception e) {
@@ -321,27 +335,24 @@ public class SqlServerReaderWriter
     }
   }
 
-  // public void Insert(List<Podcast> podcasts)
-  // {
-  //   using var connection = new SqlConnection(this._connectionString);
-  //   connection.Open();
-  //   var transaction = connection.BeginTransaction();
-  //   try {
-  //     var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.TableLock, transaction);
-  //     bulkCopy.BatchSize = 1000;
-  //     bulkCopy.DestinationTableName = "fruitshop-collections";
-  //     bulkCopy.ColumnMappings.Add("CollectionId", "collection_id");
-  //     bulkCopy.ColumnMappings.Add("CollectionName", "collection_name");
-  //     bulkCopy.ColumnMappings.Add("FeedUrl", "feed_url");
-  //     bulkCopy.WriteToServer(podcasts.AsDataTable());
-  //     transaction.Commit();
-  //   }
-  //   catch (Exception e) {
-  //     Console.WriteLine(e.Message);
-  //     transaction.Rollback();
-  //   }
-  //   finally {
-  //     connection.Close();
-  //   }
-  // }
+  public List<Collection> FindAnyCollection(String pattern)
+  {
+    var result = new List<Collection>();
+    using var connection = new SqlConnection(this._connectionString);
+    connection.Open();
+    try {
+      var parameters = new DynamicParameters();
+      parameters.Add("@pattern", dbType: DbType.String, direction: ParameterDirection.Input, value: pattern);
+      result = connection.Query<dynamic>("sp_find_any_collection", parameters, commandType: CommandType.StoredProcedure)
+      .Select(item => new Collection { CollectionId = item.collection_id, CollectionName = item.collection_name, FeedUrl = item.feed_url })
+      .ToList();
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
+  }
 }

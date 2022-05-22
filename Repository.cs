@@ -19,9 +19,13 @@ public class Repository
   public static List<String> SelectPendingCollectionIds(Int32 count) => s_readerWriter.SelectPendingCollectionIds(count);
   public static Int32 CountPendingCollectionIds() => s_readerWriter.CountPendingCollectionIds();
 
+  public static List<String> SelectCollectionIds() => s_readerWriter.SelectCollectionIds();
   public static Int32 CountCollectionIds() => s_readerWriter.CountCollectionIds();
+
   public static void InsertCollectionIds(Int32 id, List<String> collectionIds) => s_readerWriter.InsertCollectionIds(id, collectionIds);
   public static void RetireCollectionIds(Int32 id, List<String> collectionIds) => s_readerWriter.RetireCollectionIds(id, collectionIds);
   public static void UpdateCollection(Collection collection) => s_readerWriter.UpdateCollection(collection);
   public static void UpdateFailedCollection(String collectionId) => s_readerWriter.UpdateFailedCollection(collectionId);
+
+  public static List<Collection> FindAnyCollection(String pattern) => s_readerWriter.FindAnyCollection(pattern);
 }
