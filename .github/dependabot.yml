@@ -1,7 +1,7 @@
 version: 2
 updates:
   — package-ecosystem: "nuget"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "05:00"
+  directory: "/"
+  schedule:
+    interval: "daily"
+    time: "05:00"
