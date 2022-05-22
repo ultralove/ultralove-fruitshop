@@ -14,7 +14,7 @@ public class ScanCommand
       this._url = this.Url;
     }
 
-    var storedIds = Repository.SelectActiveCollectionIds().ToHashSet();
+    var storedIds = Repository.SelectCollectionIds().ToHashSet();
     Console.WriteLine($"Read {storedIds.Count} podcasts from local repository.");
 
     var scanId = Repository.StartScan();
