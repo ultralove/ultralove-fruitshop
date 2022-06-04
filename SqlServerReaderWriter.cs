@@ -47,6 +47,64 @@ public class SqlServerReaderWriter
     }
   }
 
+  public List<Collection> SelectCollections()
+  {
+    var result = new List<Collection>();
+    using var connection = new SqlConnection(this._connectionString);
+    connection.Open();
+    try {
+      result = connection.Query<Collection>("sp_select_collections", commandType: CommandType.StoredProcedure).ToList();
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+    }
+    finally {
+      connection.Close();
+    }
+    return result;
+  }
+
+  public void InsertCollections(Int32 scanId, List<Collection> collections)
+  {
+    var table = new DataTable();
+    table.Columns.Add("collection_id", typeof(String));
+    table.Columns.Add("collection_name", typeof(String));
+    table.Columns.Add("feed_url", typeof(String));
+    table.Columns.Add("scan_id", typeof(String));
+    table.Columns.Add("retired", typeof(String));
+    table.Columns.Add("retry_count", typeof(String));
+    collections.ForEach(collection => {
+      if ((String.IsNullOrEmpty(collection.CollectionName) == false) && (String.IsNullOrEmpty(collection.FeedUrl) == false)) {
+        table.Rows.Add(new Object[] { collection.CollectionId, collection.CollectionName, collection.FeedUrl, scanId, -1, 0 });
+      }
+    });
+
+    using var connection = new SqlConnection(this._connectionString);
+    connection.Open();
+    using var transaction = connection.BeginTransaction();
+    try {
+      var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.TableLock, transaction);
+      bulkCopy.BatchSize = 1000;
+      bulkCopy.DestinationTableName = "fruitshop_collections";
+      bulkCopy.ColumnMappings.Add("collection_id", "collection_id");
+      bulkCopy.ColumnMappings.Add("collection_name", "collection_name");
+      bulkCopy.ColumnMappings.Add("feed_url", "feed_url");
+      bulkCopy.ColumnMappings.Add("scan_id", "scan_id");
+      bulkCopy.ColumnMappings.Add("retired", "retired");
+      bulkCopy.ColumnMappings.Add("retry_count", "retry_count");
+      bulkCopy.WriteToServer(table);
+      transaction.Commit();
+    }
+    catch (Exception e) {
+      Console.WriteLine(e.Message);
+      transaction.Rollback();
+    }
+    finally {
+      connection.Close();
+    }
+  }
+
+
   public List<String> SelectActiveCollectionIds()
   {
     var result = new List<String>();

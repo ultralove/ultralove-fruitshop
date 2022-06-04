@@ -7,6 +7,10 @@ public class Repository
   public static Int32 StartScan() => s_readerWriter.StartScan();
   public static void StopScan(Int32 id) => s_readerWriter.StopScan(id);
 
+  public static List<Collection> SelectCollections() => s_readerWriter.SelectCollections();
+
+  public static void InsertCollections(Int32 scanId, List<Collection> collections) => s_readerWriter.InsertCollections(scanId, collections);
+
   public static List<String> SelectActiveCollectionIds() => s_readerWriter.SelectActiveCollectionIds();
   public static Int32 CountActiveCollectionIds() => s_readerWriter.CountActiveCollectionIds();
 

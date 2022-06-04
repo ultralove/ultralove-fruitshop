@@ -109,6 +109,22 @@ GO
 CREATE UNIQUE CLUSTERED INDEX ix_fruitshop_collection_id_scan_id ON fruitshop_collections (collection_id, scan_id);
 GO
 
+-- sp_select_collection
+DROP PROCEDURE IF EXISTS sp_select_collections;
+GO
+
+CREATE PROCEDURE sp_select_collections
+AS
+BEGIN
+  SET NOCOUNT ON
+  SELECT collection_id AS CollectionId, collection_name AS CollectionName, feed_url AS FeedUrl
+  FROM fruitshop_collections;
+END;
+GO
+
+GRANT EXECUTE ON sp_select_collections TO fruitshop;
+GO
+
 -- sp_select_collection_ids
 DROP PROCEDURE IF EXISTS sp_select_collection_ids;
 GO
